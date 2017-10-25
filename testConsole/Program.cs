@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using System.Net;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
+using System.Text;
 
 namespace testConsole
 {
@@ -72,9 +73,9 @@ web_url(""sign_in"",
 
 
             var driver = new runDriver(mycode);
-            var rt = driver.runCode();
+            var rt = driver.runCode("D:\\testHttpclient");
             Console.WriteLine("result : " + rt);
-
+            Encoding.UTF8.GetBytes("");
             Console.ReadLine();
         }
     }

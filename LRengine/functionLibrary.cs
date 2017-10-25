@@ -7,17 +7,38 @@ using System.Linq;
 using System.Net.Http;
 using LRengine.extend;
 using LRengine.httpHandler;
+using HtmlAgilityPack;
+using System.Threading.Tasks;
+using System.Net;
+using LRengine.report;
 
 namespace LRengine
 {
     public class functionLibrary {
 
+        
+
+        private StatusCodeHandler statusCodeHandler;
+        private NetworkStatisticsHandler networkStatisticsHandler;
+        private HttpClient httpClient;
+        private List<string> resourceCache = new List<string>();
+
         public iRunLog log;
+        public Keyword EXTRARES { get; private set; }
+        public Keyword ENDITEM { get; private set; }
+        public Keyword LAST { get; private set; }
+
 
         public functionLibrary(iRunLog log) {
+            
 
-            HttpMessageHandler handler = new redirectHandler(3,new HttpClientHandler() { AllowAutoRedirect = false});
-            handler = new DecompressionHandler(System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate, handler);
+            HttpMessageHandler handler;
+            handler = new HttpClientHandler() { AllowAutoRedirect = false };
+            statusCodeHandler = new StatusCodeHandler(handler);
+            handler = statusCodeHandler;
+            handler = new MyRedirectHandler(5, handler);
+            networkStatisticsHandler = new NetworkStatisticsHandler(handler);
+            handler = new MyDecompressionHandler(System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate, networkStatisticsHandler);
 
             //自动处理gzip
             //HttpClientHandler handler = new HttpClientHandler() {
@@ -39,11 +60,7 @@ namespace LRengine
         }
 
 
-        private HttpClient httpClient;
-        public Keyword EXTRARES { get; private set; }
-        public Keyword ENDITEM { get; private set; }
-        public Keyword LAST { get; private set; }
-
+       
         
 
         public void logLine(int line) {
@@ -59,21 +76,100 @@ namespace LRengine
             List<Dictionary<string, string>> resourceAttributes = getResourceAttributes(attrs);
 
             var targetUri = new Uri(url.Split('=', 2)[1]);
-            
+
             if (attributes.ContainsKey("RecContentType")) {
                 // TODO: attributes-RecContentType 处理
             }
-            
+
             var hrm = new HttpRequestMessage(HttpMethod.Get, targetUri);
+
 
             if (attributes.ContainsKey("Referer")) {
                 hrm.Headers.Referrer = new Uri(attributes["Referer"]);
             }
 
-            httpClient.SendAsync(hrm);
+            var response =  httpClient.SendAsync(hrm).Result;
 
+            var rrs = ResourceGet(response);
+
+
+            StepReport report = new StepReport();
+            report.StatusCode = response.StatusCode;
+
+            //获取HttpStatusCodes 统计
+            report.TotalStatusCodes = statusCodeHandler.GetStatusCodes();
+            statusCodeHandler.ResetData();
+
+            //获取流量统计
+            report.HeaderFlow = networkStatisticsHandler.HeaderFlow;
+            report.BodyFlow = networkStatisticsHandler.BodyFlow;
+            networkStatisticsHandler.ResetData();
 
         }
+
+        private List<ResourceReport> ResourceGet(HttpResponseMessage response) {
+            var requestUri = response.RequestMessage.RequestUri;
+            HtmlDocument hd = new HtmlDocument();
+            hd.Load(response.Content.ReadAsStreamAsync().Result);
+
+            var scripts = hd.DocumentNode.Descendants("script").ToArray();
+            var links = hd.DocumentNode.Descendants("link").ToArray();
+            var imgs = hd.DocumentNode.Descendants("img").ToArray();
+
+            //提取资源文件地址
+            List<Uri> ResourceUris = new List<Uri>();
+            foreach (var s in scripts) {
+                string src = s.GetAttributeValue("src", null);
+                if (string.IsNullOrEmpty(src)) {
+                    Uri ResourceUri = new Uri(requestUri, src);
+                    if (!ResourceUris.Contains(ResourceUri))
+                        ResourceUris.Add(ResourceUri);
+                }
+            }
+            foreach (var s in links) {
+                string src = s.GetAttributeValue("href", null);
+                if (string.IsNullOrEmpty(src)) {
+                    Uri ResourceUri = new Uri(requestUri, src);
+                    if (!ResourceUris.Contains(ResourceUri))
+                        ResourceUris.Add(ResourceUri);
+                }
+            }
+            foreach (var s in imgs) {
+                string src = s.GetAttributeValue("src", null);
+                if (string.IsNullOrEmpty(src)) {
+                    Uri ResourceUri = new Uri(requestUri, src);
+                    if (!ResourceUris.Contains(ResourceUri))
+                        ResourceUris.Add(ResourceUri);
+                }
+            }
+
+
+            List<Task> tks = new List<Task>();
+            List<ResourceReport> ResourceReports = new List<ResourceReport>();
+            foreach (var ResourceUri in ResourceUris) {
+
+                //是否存在缓存
+                if (resourceCache.Contains(ResourceUri.AbsoluteUri)) {
+                    ResourceReports.Add(new ResourceReport() { Url = ResourceUri.AbsoluteUri, isFormCache = true, StatusCode = HttpStatusCode.OK });
+                } else {
+                    tks.Add(httpClient.GetAsync(ResourceUri).ContinueWith(t => {
+                        if (t.Result.StatusCode == HttpStatusCode.OK)
+                            resourceCache.Add(ResourceUri.AbsoluteUri);
+                        ResourceReports.Add(new ResourceReport() { Url = ResourceUri.AbsoluteUri, isFormCache = false, StatusCode = t.Result.StatusCode });
+                    }));
+                    
+                }
+
+            }
+
+           
+
+            Task.WaitAll(tks.ToArray());
+            return ResourceReports;
+        }
+
+
+     
 
         /// <summary>
         /// Attributes 数据处理

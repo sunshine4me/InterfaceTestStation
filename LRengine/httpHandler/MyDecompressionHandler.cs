@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace LRengine.httpHandler
 {
-    public class DecompressionHandler : DelegatingHandler {
+    public class MyDecompressionHandler : DelegatingHandler {
         private readonly DecompressionMethods _decompressionMethods;
 
         private const string s_gzip = "gzip";
@@ -18,7 +18,7 @@ namespace LRengine.httpHandler
         private static StringWithQualityHeaderValue s_gzipHeaderValue = new StringWithQualityHeaderValue(s_gzip);
         private static StringWithQualityHeaderValue s_deflateHeaderValue = new StringWithQualityHeaderValue(s_deflate);
 
-        public DecompressionHandler(DecompressionMethods decompressionMethods, HttpMessageHandler innerHandler) : base(innerHandler) {
+        public MyDecompressionHandler(DecompressionMethods decompressionMethods, HttpMessageHandler innerHandler) : base(innerHandler) {
           
             if (decompressionMethods == DecompressionMethods.None) {
                 throw new ArgumentOutOfRangeException(nameof(decompressionMethods));
@@ -55,18 +55,21 @@ namespace LRengine.httpHandler
                         // Unknown content encoding.  Stop processing.
                         break;
                     }
+
+                    
                 }
             }
+
 
             return response;
         }
 
   
-        private abstract class DecompressedContent : HttpContent {
+        private abstract class MyDecompressedContent : HttpContent {
             HttpContent _originalContent;
             bool _contentConsumed;
 
-            public DecompressedContent(HttpContent originalContent) {
+            public MyDecompressedContent(HttpContent originalContent) {
                 _originalContent = originalContent;
                 _contentConsumed = false;
 
@@ -120,12 +123,17 @@ namespace LRengine.httpHandler
                 }
                 base.Dispose(disposing);
             }
+
+            //获得原HttpContent
+            public HttpContent getOriginalContent() {
+                return _originalContent;
+            }
         }
 
 
 
 
-        private sealed class GZipDecompressedContent : DecompressedContent {
+        private sealed class GZipDecompressedContent : MyDecompressedContent {
             public GZipDecompressedContent(HttpContent originalContent)
                 : base(originalContent) { }
 
@@ -133,7 +141,7 @@ namespace LRengine.httpHandler
                 new GZipStream(originalStream, CompressionMode.Decompress);
         }
 
-        private sealed class DeflateDecompressedContent : DecompressedContent {
+        private sealed class DeflateDecompressedContent : MyDecompressedContent {
             public DeflateDecompressedContent(HttpContent originalContent)
                 : base(originalContent) { }
 

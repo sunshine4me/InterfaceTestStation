@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace LRengine.httpHandler
 {
-    public class redirectHandler : DelegatingHandler {
+    public class MyRedirectHandler : DelegatingHandler {
         private readonly int _maxAutomaticRedirections;
 
-        public redirectHandler(int maxAutomaticRedirections, HttpMessageHandler innerHandler):base(innerHandler) {
+        public MyRedirectHandler(int maxAutomaticRedirections, HttpMessageHandler innerHandler):base(innerHandler) {
 
             if (maxAutomaticRedirections < 0) {
                 throw new ArgumentOutOfRangeException(nameof(maxAutomaticRedirections));
@@ -87,7 +87,7 @@ namespace LRengine.httpHandler
                     request.Method = HttpMethod.Get;
                     request.Content = null;
                 }
-
+                //Console.WriteLine(response.Headers.ToString());
                 // Do the redirect.
                 response.Dispose();
             }

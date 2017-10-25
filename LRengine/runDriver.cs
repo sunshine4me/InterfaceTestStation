@@ -34,7 +34,8 @@ namespace LRengine
             funLib = new functionLibrary(this.log);
         }
 
-        public object runCode() {
+        public object runCode(string logPath) {
+            funLib.ResourcePath = logPath;
             SyntaxTree tree = CSharpSyntaxTree.ParseText("int " + code);
             var root = (CompilationUnitSyntax)tree.GetRoot();
 
@@ -105,6 +106,11 @@ namespace LRengine
 
         public void Log(string msg) {
             Console.WriteLine(msg);
+        }
+
+        public void Report(HttpReport report) {
+            
+            
         }
 
         public void Warring(string msg) {
