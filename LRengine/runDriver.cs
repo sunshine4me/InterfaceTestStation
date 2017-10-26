@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LRengine.report;
 
 namespace LRengine
 {
@@ -35,7 +36,7 @@ namespace LRengine
         }
 
         public object runCode(string logPath) {
-            funLib.ResourcePath = logPath;
+
             SyntaxTree tree = CSharpSyntaxTree.ParseText("int " + code);
             var root = (CompilationUnitSyntax)tree.GetRoot();
 
@@ -108,9 +109,8 @@ namespace LRengine
             Console.WriteLine(msg);
         }
 
-        public void Report(HttpReport report) {
-            
-            
+        public void StepLog(StepReport report) {
+            Console.WriteLine(report.Name+" run over.");
         }
 
         public void Warring(string msg) {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LRengine.report;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
@@ -10,6 +11,7 @@ namespace LRengine
         void Log(string msg);
         void Warring(string msg);
         void Error(string msg);
+        void StepLog(StepReport report);
     }
 
     

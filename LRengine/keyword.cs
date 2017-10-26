@@ -7,6 +7,7 @@ namespace LRengine
     public enum Keyword {
         EXTRARES,
         ENDITEM,
-        LAST
+        LAST,
+        ITEMDATA
     }
 }
