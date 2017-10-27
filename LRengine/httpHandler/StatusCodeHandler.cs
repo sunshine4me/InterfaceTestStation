@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LRengine.httpHandler {
+namespace LRengine.HttpHandler {
     /// <summary>
     /// 统计StatusCode 状态码总量
     /// </summary>

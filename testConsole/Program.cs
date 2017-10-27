@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using System.Net;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using System.Text;
-using LRengine.report;
+using LRengine.Report;
 using System.Collections.Generic;
 
 namespace testConsole
@@ -64,8 +64,7 @@ namespace testConsole
 
 
             string mycode = @"action(){
-web_add_auto_header(""ssss"",""hahaaha"");
-web_remove_auto_header(""Accept"",LAST);
+web_reg_find(""Fail=NotFound"",""Search=Body"",""Text="");
 
 web_submit_data(""login"", 
         ""Action=https://testerhome.com/account/sign_in"", 

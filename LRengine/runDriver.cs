@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using LRengine.report;
+using LRengine.Report;
 
 namespace LRengine
 {
@@ -23,16 +23,15 @@ namespace LRengine
             }
         }
         public iRunLog log { get; set; }
-        public IEnumerable<codeIssue> codeIssues;
-        private functionLibrary funLib;
-        private StringBuilder lastCode;
+        public IEnumerable<CodeIssue> codeIssues;
+        private FunctionLibrary funLib;
 
         public runDriver(string code) :this(code,new autoLog()){
         }
         public runDriver(string code,iRunLog log) {
             this.code = code;
             this.log = log;
-            funLib = new functionLibrary(this.log);
+            funLib = new FunctionLibrary(this.log);
         }
 
         public object runCode(string logPath) {
@@ -81,14 +80,14 @@ namespace LRengine
             }
         }
 
-        private IEnumerable<codeIssue> Compile() {
+        private IEnumerable<CodeIssue> Compile() {
 
             // 从源代码生成语法树
             SyntaxTree tree = CSharpSyntaxTree.ParseText("int " + code);
             var root = (CompilationUnitSyntax)tree.GetRoot();
 
             var rt = from t in root.GetDiagnostics()
-                     select new codeIssue {
+                     select new CodeIssue {
                          Id = t.Id,
                          Message = t.GetMessage(),
                          Severity = t.Severity.ToString(),

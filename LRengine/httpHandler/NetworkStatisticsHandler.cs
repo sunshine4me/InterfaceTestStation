@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LRengine.httpHandler
+namespace LRengine.HttpHandler
 {
     public class NetworkStatisticsHandler : DelegatingHandler {
 

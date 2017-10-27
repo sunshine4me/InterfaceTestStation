@@ -5,18 +5,17 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
-using LRengine.extend;
-using LRengine.httpHandler;
+using LRengine.HttpHandler;
 using HtmlAgilityPack;
 using System.Threading.Tasks;
 using System.Net;
-using LRengine.report;
-using System.Net.Http.Headers;
+using LRengine.Report;
+using LRengine.ResponseEvent;
 
 namespace LRengine
 {
     
-    public class functionLibrary {
+    public class FunctionLibrary {
 
         
 
@@ -28,7 +27,10 @@ namespace LRengine
         private Dictionary<string, string> customAutoHeader = new Dictionary<string, string>();
         private Dictionary<string, string> nextRequestHeader = new Dictionary<string, string>();
 
-        
+        private List<RegisterEvent> responseEvents = new List<RegisterEvent>();
+
+
+
 
         public iRunLog log;
         public Keyword EXTRARES { get; private set; }
@@ -39,7 +41,7 @@ namespace LRengine
         
 
 
-        public functionLibrary(iRunLog log) {
+        public FunctionLibrary(iRunLog log) {
             
 
             HttpMessageHandler handler;
@@ -90,6 +92,39 @@ namespace LRengine
 
         
 
+        public void web_reg_find(params object[] attrs) {
+            Dictionary<string, string> attributes = getAttributes(attrs);
+            WebRegFindArgs args = new WebRegFindArgs();
+            if (attributes.ContainsKey("search")) {
+                string search = attributes["search"].ToLower();
+                if (search == "body") {
+                    args.Search = SearchIn.Body;
+                } else if(search == "headers") {
+                    args.Search = SearchIn.Headers;
+                }
+            }
+
+            if (attributes.ContainsKey("fail")) {
+                string search = attributes["fail"].ToLower();
+                if (search == "found") {
+                    args.Fail = FailIf.Found;
+                }
+            }
+
+            if (attributes.ContainsKey("text")) {
+                args.Text = attributes["text"];
+            } else {
+                return;
+            }
+
+
+            var del = new ResponseDelegate(ResponseEventFactory.WebRegFind);
+            responseEvents.Add(new RegisterEvent() { DelegateEvent = del, EventArgs = args });
+        }
+
+        
+
+
         public void web_url(string name, string url, params object[] attrs) {
             StepReport report = new StepReport();
             report.Name = name;
@@ -105,6 +140,7 @@ namespace LRengine
             var response =  httpClient.SendAsync(request).Result;
 
             completeToReport(report, response, attributes);
+            completeResponseEvent(response);
         }
 
         public void web_submit_data(string name, string action, params object[] attrs) {
@@ -137,8 +173,8 @@ namespace LRengine
             var response = httpClient.SendAsync(request).Result;
 
             completeToReport(report, response, attributes);
-           
 
+            completeResponseEvent(response);
         }
 
 
@@ -163,6 +199,17 @@ namespace LRengine
             networkStatisticsHandler.ResetData();
 
             log.StepLog(report);
+        }
+
+        private void completeResponseEvent(HttpResponseMessage response) {
+            foreach (var eve in responseEvents) {
+                eve.EventArgs.Response = response;
+                if (!eve.Execute()) {
+                    throw new Exception("oh~~~~~~~~~~~~~~~shit");
+                }
+            }
+
+            responseEvents.Clear();
         }
 
         private List<ResourceReport> ResourceGet(HttpResponseMessage response) {

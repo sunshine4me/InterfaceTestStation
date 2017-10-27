@@ -4,7 +4,7 @@ using System.Text;
 
 namespace LRengine
 {
-    public class codeIssue
+    public class CodeIssue
     {
         /// <summary>
         /// 错误代码

@@ -8,7 +8,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LRengine.httpHandler
+namespace LRengine.HttpHandler
 {
     public class MyDecompressionHandler : DelegatingHandler {
         private readonly DecompressionMethods _decompressionMethods;
