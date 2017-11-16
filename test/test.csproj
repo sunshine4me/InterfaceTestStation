@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LRengine\LRengine.csproj" />
+    <ProjectReference Include="..\APITest.ScriptFactory\APITest.ScriptFactory.csproj" />
   </ItemGroup>
 
 </Project>

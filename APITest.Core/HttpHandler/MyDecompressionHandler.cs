@@ -8,8 +8,11 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LRengine.HttpHandler
+namespace APITest.Core.HttpHandler
 {
+    /// <summary>
+    /// Response解压相关
+    /// </summary>
     public class MyDecompressionHandler : DelegatingHandler {
         private readonly DecompressionMethods _decompressionMethods;
 

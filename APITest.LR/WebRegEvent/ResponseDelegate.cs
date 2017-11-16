@@ -1,14 +1,15 @@
-﻿using System;
+﻿using APITest.Core;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 
-namespace LRengine.ResponseEvent
-{
+namespace APITest.LR.WebRegEvent {
     public delegate bool ResponseDelegate(ResponseDelegateArgs args);
     public class ResponseDelegateArgs
     {
         public HttpResponseMessage Response { get; set; }
+        public iRunLog Log { get; set; }
     }
 
     public class RegisterEvent {

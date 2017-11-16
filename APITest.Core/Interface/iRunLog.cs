@@ -1,17 +1,17 @@
-﻿using LRengine.Report;
+﻿
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 
-namespace LRengine
-{
+namespace APITest.Core {
     public interface iRunLog
     {
         void Log(string msg);
         void Warring(string msg);
         void Error(string msg);
-        void StepLog(StepReport report);
+        void ReportResponse(HttpResponseMessage res);
     }
 
     

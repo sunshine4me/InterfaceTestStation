@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LRengine
-{
+namespace APITest.LR {
     public enum Keyword {
         EXTRARES,
         ENDITEM,

@@ -1,19 +1,17 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using APITest.Core;
+using APITest.LR;
+using APITest.LR.Interface;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Scripting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using LRengine.Report;
 
-namespace LRengine
-{
-    public class runDriver
-    {
+namespace APITest.ScriptFactory {
+    public class ScriptEngine {
         private string _code;
         public string code {
             get { return _code; }
@@ -22,19 +20,18 @@ namespace LRengine
                 this.codeIssues = Compile();
             }
         }
-        public iRunLog log { get; set; }
+
         public IEnumerable<CodeIssue> codeIssues;
-        private FunctionLibrary funLib;
+    
 
-        public runDriver(string code) :this(code,new autoLog()){
-        }
-        public runDriver(string code,iRunLog log) {
+        public ScriptEngine(string code) {
             this.code = code;
-            this.log = log;
-            funLib = new FunctionLibrary(this.log);
+            
         }
 
-        public object runCode(string logPath) {
+
+        public object runCode(iRunLog log,Dictionary<string,string> Parameters) {
+            
 
             SyntaxTree tree = CSharpSyntaxTree.ParseText("int " + code);
             var root = (CompilationUnitSyntax)tree.GetRoot();
@@ -68,13 +65,21 @@ namespace LRengine
                 return null;
             }
 
+            var LRRunTime = new RunTime(log, Parameters);
+
             var result = CSharpScript.RunAsync(root.ChildNodes().First().ChildNodes().OfType<BlockSyntax>().First().ToFullString(),
-                           globals: funLib);
-            return result.Result.ReturnValue;
+                           globals: LRRunTime);
+            try {
+                return result.Result.ReturnValue;
+            } catch (Exception e) {
+
+                return e;
+            }
+
         }
 
         private void RegenerateCode(IEnumerable<SyntaxNode> nodes) {
-            
+
             foreach (var node in nodes) {
                 if (node.ChildNodes().Any()) RegenerateCode(node.ChildNodes());
             }
@@ -96,24 +101,6 @@ namespace LRengine
                      };
 
             return rt.ToList();
-        }
-    }
-
-    public class autoLog : iRunLog {
-        public void Error(string msg) {
-            Console.WriteLine("Error : " + msg);
-        }
-
-        public void Log(string msg) {
-            Console.WriteLine(msg);
-        }
-
-        public void StepLog(StepReport report) {
-            Console.WriteLine(report.Name+" run over.");
-        }
-
-        public void Warring(string msg) {
-            Console.WriteLine("Warring : " + msg);
         }
     }
 }

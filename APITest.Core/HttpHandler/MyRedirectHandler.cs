@@ -6,13 +6,17 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LRengine.HttpHandler
+namespace APITest.Core.HttpHandler
 {
+    /// <summary>
+    /// 跳转
+    /// </summary>
     public class MyRedirectHandler : DelegatingHandler {
         private readonly int _maxAutomaticRedirections;
+        private iRunLog _log;
 
-        public MyRedirectHandler(int maxAutomaticRedirections, HttpMessageHandler innerHandler):base(innerHandler) {
-
+        public MyRedirectHandler(int maxAutomaticRedirections, HttpMessageHandler innerHandler,iRunLog log):base(innerHandler) {
+            _log = log;
             if (maxAutomaticRedirections < 0) {
                 throw new ArgumentOutOfRangeException(nameof(maxAutomaticRedirections));
             }
@@ -52,7 +56,9 @@ namespace LRengine.HttpHandler
             HttpResponseMessage response;
             uint redirectCount = 0;
             while (true) {
+                
                 response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                _log.ReportResponse(response);
 
                 if (!RequestNeedsRedirect(response)) {
                     break;
@@ -79,15 +85,29 @@ namespace LRengine.HttpHandler
                 if (redirectCount > _maxAutomaticRedirections) {
                     throw new HttpRequestException(" redirectCount Exceed maximum : " + _maxAutomaticRedirections);
                 }
+                _log.Log($"Redirecting \"{request.RequestUri}\" (redirection depth is {redirectCount-1})");
+
+
 
                 // Set up for the automatic redirect
                 request.RequestUri = location;
+
+                //creatNewRequest
+                //var lastRequest = request;
+                //request = new HttpRequestMessage(lastRequest.Method, location);
+                //request.Content = lastRequest.Content;
+                //foreach (var h in lastRequest.Headers) {
+                //    request.Headers.Add(h.Key, h.Value);
+                //}
+
+
+                _log.Log($"To location \"{request.RequestUri}\"");
 
                 if (RequestRequiresForceGet(response.StatusCode, request.Method)) {
                     request.Method = HttpMethod.Get;
                     request.Content = null;
                 }
-                //Console.WriteLine(response.Headers.ToString());
+    
                 // Do the redirect.
                 response.Dispose();
             }
