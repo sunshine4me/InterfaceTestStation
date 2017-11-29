@@ -25,5 +25,6 @@ namespace APITest.LR.Interface
         void web_cleanup_auto_headers();
 
         string lr_eval_string(string value);
+
     }
 }

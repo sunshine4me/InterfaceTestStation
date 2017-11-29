@@ -7,18 +7,32 @@ using System.Text;
 namespace APITest.LR.Handler {
 
 
-
-    internal class ParamsTransformHandler : iLRParamsAssembleFunctions {
+    /// <summary>
+    /// 参数控制
+    /// </summary>
+    internal class ParamsTransformHandler : iLRFunctions {
 
         
         private Dictionary<string, string> Parameters;
-        iLRParamsAssembleFunctions innerFuns;
+        iLRFunctions innerFuns;
         iRunLog Log;
-        public ParamsTransformHandler(iLRParamsAssembleFunctions fun, iRunLog log,Dictionary<string, string> parameters) {
+        public ParamsTransformHandler(iLRFunctions fun, iRunLog log,Dictionary<string, string> parameters) {
             Log = log;
             innerFuns = fun;
             Parameters = parameters;
         }
+
+        #region 不需替换参数的Fun
+
+        public void lr_output_message(string text, params object[] attrs) {
+            innerFuns.lr_output_message(text, attrs);
+        }
+
+
+        public void lr_save_string(string value, string name) {
+            innerFuns.lr_save_string(value,name);
+        }
+        #endregion
 
         public string lr_eval_string(string value) {
             value = InjectionParam(value);
@@ -89,6 +103,9 @@ namespace APITest.LR.Handler {
             return v;
         }
 
+        /// <summary>
+        /// 转换{参数}
+        /// </summary>
         private void InjectionParam(object[] attrs) {
 
             for(int i=0;i< attrs.Length; i++) {

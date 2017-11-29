@@ -7,13 +7,13 @@ using System.Text;
 
 namespace APITest.LR.Handler
 {
-    internal class FunParamsAssembleHandler : iLRParamsAssembleFunctions {
+    internal class FunctionsHandler : iLRFunctions {
 
         private FunctionsCore runTime;
         private iRunLog Log;
         private Dictionary<string, string> Parameters;
 
-        public FunParamsAssembleHandler(iRunLog log, Dictionary<string, string> parameters) {
+        public FunctionsHandler(iRunLog log, Dictionary<string, string> parameters) {
             Log = log;
             Parameters = parameters;
             runTime = new FunctionsCore(log);
@@ -242,6 +242,13 @@ namespace APITest.LR.Handler
             return value;
         }
 
-        
+        public void lr_save_string(string value, string name) {
+            Parameters[name] = value;
+        }
+
+        public void lr_output_message(string text, params object[] attrs) {
+            Log.Warring("lr_output_message is not support, please use [Log(string msg)]");
+            Log.Log(text);
+        }
     }
 }

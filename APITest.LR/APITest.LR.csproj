@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Interface\iLRParamsAssembleFunctions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\APITest.Core\APITest.Core.csproj" />
   </ItemGroup>
 

@@ -7,9 +7,9 @@ using APITest.LR.Handler;
 
 namespace APITest.LR
 {
-    public class RunTime : iLRParamsAssembleFunctions,iLRFunctions {
+    public class RunTime : iLRFunctions {
 
-        public iLRParamsAssembleFunctions innerFuns;
+        public iLRFunctions innerFuns;
 
         public Keyword EXTRARES { get; private set; }
         public Keyword ENDITEM { get; private set; }
@@ -24,7 +24,7 @@ namespace APITest.LR
             Log = log;
             Parameters = parameters;
             InitKeyword();
-            iLRParamsAssembleFunctions handler = new FunParamsAssembleHandler(log, Parameters);
+            var handler = new FunctionsHandler(log, Parameters);
             innerFuns = new ParamsTransformHandler(handler, log, Parameters);
         }
 
@@ -71,17 +71,18 @@ namespace APITest.LR
             innerFuns.web_url(name, url, attrs);
         }
 
-        public void lr_save_string(string value, string name) {
-            Parameters[name] = value;
-        }
-
         public string lr_eval_string(string value) {
             return innerFuns.lr_eval_string(value);
         }
 
+        public void lr_save_string(string value, string name) {
+            innerFuns.lr_save_string(value, name);
+        }
+
+        
+
         public void lr_output_message(string text, params object[] attrs) {
-            Log.Warring("lr_output_message is not support, please use [Log(string msg)]");
-            Log.Log(text);
+            innerFuns.lr_output_message(text, attrs);
         }
 
         
