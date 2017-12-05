@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace APITest.Web
 {
@@ -38,6 +39,14 @@ namespace APITest.Web
             }
 
             app.UseStaticFiles();
+
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings.Add(".proto", "text/plain");
+            app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = provider });
+
+
+            app.UseWebSockets();
+            app.Map("/WS/HttpAgent", HttpAgent.HttpAgentWebsocketHandler.MapControl);
 
             app.UseMvc(routes =>
             {

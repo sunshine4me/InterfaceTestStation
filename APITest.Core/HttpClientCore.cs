@@ -58,12 +58,12 @@ namespace APITest.Core
 
 
         public HttpResponseMessage HttpPostForm(Uri requestUri, Dictionary<string, string> headers, IEnumerable<KeyValuePair<string, string>> formCollection, bool resourceGet = false) {
-            return HttpPost(requestUri, headers, new FormUrlEncodedContent(formCollection), resourceGet);
+            return HttpCustom(requestUri, HttpMethod.Post, headers, new FormUrlEncodedContent(formCollection), resourceGet);
         }
 
-        public HttpResponseMessage HttpPost(Uri requestUri, Dictionary<string, string> headers, HttpContent body, bool resourceGet = false) {
+        public HttpResponseMessage HttpCustom(Uri requestUri, HttpMethod method, Dictionary<string, string> headers, HttpContent body, bool resourceGet = false) {
 
-            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            var request = new HttpRequestMessage(method, requestUri);
           
             request.Content = body;
             SetRequestHeaders(request, headers);

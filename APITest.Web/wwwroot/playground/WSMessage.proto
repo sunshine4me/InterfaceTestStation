@@ -1,0 +1,41 @@
+﻿package APITest.Web.HttpAgent;
+syntax = "proto3";
+
+message WSMessage {  
+    required MessageType type = 1;
+    required bytes message = 2;
+}
+
+
+enum MessageType {
+    Log = 1;
+    LRFunction = 2;
+	LRFunctionRes = 3;
+}
+
+enum LogType {
+    Log = 1;
+    Warring = 2;
+	Error = 3;
+}
+
+
+message Log{
+	required LogType type = 1;
+	required string logMessage = 2;
+}
+
+
+
+
+message LRFunction {
+    required string name = 1;
+    repeated string args =2;
+}
+
+message LRFunctionRes {
+    required string name = 1;
+    repeated bool isContinue =2;
+	optional string message = 3;
+}
+

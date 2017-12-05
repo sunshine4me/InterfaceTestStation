@@ -74,7 +74,7 @@ namespace APITest.LR.Handler {
 
         public void web_custom_request(string name, Uri targetUri, string body) {
             var content = new StringContent(body);
-            var res = httpClient.HttpPost(targetUri, nextRequestHeader, content);
+            var res = httpClient.HttpCustom(targetUri,HttpMethod.Post, nextRequestHeader, content);
             completeResponseEvent(res);
         }
 

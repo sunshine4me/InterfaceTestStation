@@ -9,6 +9,16 @@ namespace test
     {
         static void Main(string[] args)
         {
+
+            testFanshe.test("web_remove_auto_header", new object[] { });
+            Console.ReadLine();
+            return;
+
+
+
+
+
+
             Console.WriteLine("Hello World!");
 
 
@@ -74,7 +84,7 @@ Log.Log(""nimanaaaaaaaaaaaa"");
             Console.WriteLine(msg);
         }
 
-        public void ReportResponse(HttpResponseMessage res) {
+        public void Network(HttpResponseMessage res) {
             Console.WriteLine("ReportResponse");
         }
 

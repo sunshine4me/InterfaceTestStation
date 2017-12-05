@@ -58,7 +58,7 @@ namespace APITest.Core.HttpHandler
             while (true) {
                 
                 response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-                _log.ReportResponse(response);
+                _log.Network(response);
 
                 if (!RequestNeedsRedirect(response)) {
                     break;
