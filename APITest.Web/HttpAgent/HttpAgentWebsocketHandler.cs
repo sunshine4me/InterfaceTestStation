@@ -17,11 +17,10 @@ namespace APITest.Web.HttpAgent {
     {
         static async Task HttpTest(HttpContext hc, Func<Task> n) {
             if (!hc.WebSockets.IsWebSocketRequest) return;
-
-
             using (var webSocket = await hc.WebSockets.AcceptWebSocketAsync()) {
 
-                RunTime RT = new RunTime(new HttpAgentLog(webSocket),new Dictionary<string, string>());
+                var log = new HttpAgentLog(webSocket);
+                RunTime RT = new RunTime(log, new Dictionary<string, string>());
                 
                 byte[] ReceiveBuffer = new byte[4096];
                 var ReceiveSegment = new ArraySegment<byte>(ReceiveBuffer);
@@ -42,12 +41,13 @@ namespace APITest.Web.HttpAgent {
 
                         }
                     } catch (Exception e) {
-                        //Console.WriteLine(e.StackTrace);
-                       
+                        log.Error(e.InnerException.Message);
+
+
                         break;
                     }
                 }
-
+                Console.WriteLine("websocket is close!");
                 //到这已经断开链接了,再调用 CloseAsync 将报错
                 //await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", hc.RequestAborted);
 

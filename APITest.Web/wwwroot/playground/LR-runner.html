@@ -8,135 +8,290 @@
 
 
     <style type="text/css">
-        body {
-            margin: 0;
-            padding: 0;
-            border: 0;
+
+
+        .log {
+            padding: 4px;
         }
 
-        .monaco-editor {
-            overflow: hidden;
+       
+
+
+        .log span {
+            padding-right: 6px;
         }
     </style>
-
-
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
 
 </head>
 <body>
+    <div class="row">
+        <div class="col-md-8" id="myTabContent">
+            <div class="log" id="log">
 
+            </div>
+        </div>
+        <div class="col-md-4">
 
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th class="col-md-8">name</th>
+                        <th>status</th>
+                    </tr>
+                </thead>
+                <tbody id="network">
+                    
+                </tbody>
+            </table>
 
-    <script src="/lib/protobufjs/dist/protobuf.js"></script>
-
-    <script>
-
-
-       
-
-     
-        document.body.style.height = '100%';
-
-        // Switch `automaticLayout` property to true by default
-        //TODO: var config = require('vs/editor/common/config/config');
-        //config.getActiveEditor().automaticLayout = true;
-
-        window.load = function (js, html, css) {
-            if (css) {
-                var style = document.createElement("style");
-                style.type = "text/css";
-                style.innerHTML = css;
-                document.body.appendChild(style);
-            }
-            if (html) {
-                document.body.innerHTML += html;
-            }
-            if (js) {
-
-                var wsUri = "ws://" + window.location.host + "/WS/HttpAgent";
-
-                var websocket = new WebSocket(wsUri);
-
-                var WSMessage;
-                var MessageType;
-                var LRFunction;
-                websocket.onopen = function (evt) {
-                    protobuf.load("/playground/WSMessage.proto", function (err, root) {
-                        if (err) throw err;
-                        WSMessage = root.lookup("APITest.Web.HttpAgent.WSMessage");
-                        MessageType = root.lookup("APITest.Web.HttpAgent.MessageType");
-                        LRFunction = root.lookup("APITest.Web.HttpAgent.LRFunction");
-
-
-                        LRScriptRun(js, function (name, args) {
-                            var lrFun = LRFunction.create({ name: name, args: args });
-                            var lrBuffer = LRFunction.encode(lrFun).finish();
-
-                            var msg = WSMessage.create({ type: MessageType.values.LRFunction, message: lrBuffer });
-                          
-                            var msgBuff = WSMessage.encode(msg).finish();
-                            websocket.resOver = false;
-                            websocket.send(msgBuff);
-
-                            while (!websocket.resOver) {
-                                Sleep(500);
-                            }
-                        })
-                        websocket.close();
-                    });
-                  
-
-                };
-                websocket.onclose = function (evt) {
-                    console.log("websocket close");
-                };
-                websocket.onmessage = function (evt) {
-                    var reader = new FileReader();
-                    reader.readAsArrayBuffer(evt.data);
-                    reader.onload = function (e) {
-                        var buf = new Uint8Array(reader.result);
-                        var msg = WSMessage.decode(buf)
-                        console.log("msg.type:" + msg.type);
-                        if (msg.type == MessageType.values.LRFunctionRes)
-                            websocket.resOver = true;
-                    }
-                };
-                websocket.onerror = function (evt) {
-                    console.log("websocket error");
-                };
-
-               
-                
-                
-            }
-        };
-
-       
-        function Sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms))
-        }
-
-       
-
-        function LRScriptRun(code,callback) {
-            var EXTRARES = "@EXTRARES";
-            var LAST ="@LAST";
-            var ENDITEM = "@ENDITEM";
-            var ITEMDATA = "@ITEMDATA";
             
+        </div>
+       
+    </div>
 
-            function web_url() {
-                callback("web_url",arguments);
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+        <div class="modal-dialog" style="width: 95%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <ul id="myTab" class="nav nav-tabs">
+                        <li><a href="#request" data-toggle="tab">request</a></li>
+                        <li><a href="#response" data-toggle="tab">response</a></li>
+
+                    </ul>
+                    <div id="myTabContent" class="tab-content">
+                        
+                        <div class="tab-pane fade" id="request">
+<pre>
+
+</pre>
+                        </div>
+
+                        <div class="tab-pane fade" id="response">
+<pre>
+
+</pre>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div><!-- /.modal-content -->
+        </div>
+    </div>
+    <!-- /.modal -->
+
+        <script src="/lib/protobufjs/dist/protobuf.js"></script>
+
+        <script>
+
+
+
+
+
+            document.body.style.height = '100%';
+
+            // Switch `automaticLayout` property to true by default
+            //TODO: var config = require('vs/editor/common/config/config');
+            //config.getActiveEditor().automaticLayout = true;
+
+            window.load = function (js, html, css) {
+                if (css) {
+                    var style = document.createElement("style");
+                    style.type = "text/css";
+                    style.innerHTML = css;
+                    document.body.appendChild(style);
+                }
+                if (html) {
+                    document.body.innerHTML += html;
+                }
+                if (js) {
+
+                    var wsUri = "ws://" + window.location.host + "/WS/HttpAgent";
+
+                    var websocket = new WebSocket(wsUri);
+
+
+                    websocket.onopen = function (evt) {
+                        protobuf.load("/playground/WSMessage.proto?v8", function (err, root) {
+                            if (err) throw err;
+                            window.models = {};
+                            window.models.WSMessage = root.lookup("APITest.Web.HttpAgent.WSMessage");
+                            window.models.MessageType = root.lookup("APITest.Web.HttpAgent.MessageType");
+                            window.models.LRFunction = root.lookup("APITest.Web.HttpAgent.LRFunction");
+                            window.models.Log = root.lookup("APITest.Web.HttpAgent.Log");
+                            window.models.LogType = root.lookup("APITest.Web.HttpAgent.LogType");
+                            window.models.NetWorkMeaasge = root.lookup("APITest.Web.HttpAgent.NetWorkMeaasge");
+                            // To be shared
+                            const sharedBuffer = new SharedArrayBuffer( // (A)
+                                1 * Int32Array.BYTES_PER_ELEMENT); // 1 elements
+                            //将共享内存绑定到websocket上,为了方便&不污染全局
+                            websocket.sharedArray = new Int32Array(sharedBuffer);
+
+                            var LRWoek = new Worker("/playground/LRscriptRun.js?v5");
+                            var resOver = false;
+                            LRWoek.onmessage = function (event) {
+
+                                if (event.data == false) {
+                                    websocket.close();
+                                    return;
+                                }
+                                
+                                var lrFun = window.models.LRFunction.create(event.data);
+                                var lrBuffer = window.models.LRFunction.encode(lrFun).finish();
+
+                                var msg = window.models.WSMessage.create({ type: window.models.MessageType.values.LRFunction, message: lrBuffer });
+
+                                var msgBuff = window.models.WSMessage.encode(msg).finish();
+
+
+                                websocket.send(msgBuff);
+                            };
+
+                            //开始运行worker
+                            LRWoek.postMessage({
+                                script: js,
+                                sharedBuffer: sharedBuffer
+                            });
+                        });
+
+
+                    };
+                    websocket.onclose = function (evt) {
+                        console.log("websocket close");
+                    };
+                    websocket.onmessage = function (evt) {
+                        var reader = new FileReader();
+                        reader.readAsArrayBuffer(evt.data);
+                        reader.onload = function (e) {
+                            var buf = new Uint8Array(reader.result);
+                            var msg = window.models.WSMessage.decode(buf)
+
+
+
+
+                            if (msg.type == window.models.MessageType.values.Log) {
+                                var log = window.models.Log.decode(msg.message);
+                                createLog(log);
+                            } else if (msg.type == window.models.MessageType.values.NetWorkMeaasge) {
+                                var nwm = window.models.NetWorkMeaasge.decode(msg.message);
+                                createNetwork(nwm);
+                            }
+
+
+
+                            if (msg.type == window.models.MessageType.values.LRFunctionRes)
+                                websocket.sharedArray[0] = 1; //结束标记 修改 sharedArray
+                        }
+                    };
+                    websocket.onerror = function (evt) {
+                        console.log("websocket error");
+                    };
+
+                }
+            };
+
+
+            function createLog(obj) {
+                var logDiv = document.createElement('div');
+
+                var timeSpan = document.createElement('span');
+                timeSpan.innerText = "[" + new Date().Format("yyyy-MM-dd hh:mm:ss.S") + "]";
+                timeSpan.className = "text-success";
+
+                var typeSpan = document.createElement('span');
+                var msgSpan = document.createElement('span');
+                msgSpan.innerText = obj.logMessage;
+                if (obj.type == window.models.LogType.values.Warring) {
+                    typeSpan.innerText = "[Warring]"
+                    typeSpan.className = "text-warning";
+                    msgSpan.className = "text-warning";
+                }
+                else if (obj.type == window.models.LogType.values.Error) {
+                    typeSpan.innerText = "[Error]"
+                    typeSpan.className = "text-danger";
+                    msgSpan.className = "text-danger";
+                }
+                else if (obj.type == window.models.LogType.values.Success) {
+                    typeSpan.innerText = "[Success]"
+                    typeSpan.className = "text-success";
+                    msgSpan.className = "text-success";
+                }
+                else {
+                    typeSpan.innerText = "[Info]"
+                    typeSpan.className = "text-muted";
+                    msgSpan.className = "text-muted";
+                }
+                logDiv.appendChild(timeSpan);
+                logDiv.appendChild(typeSpan);
+                logDiv.appendChild(msgSpan);
+                document.getElementById('log').appendChild(logDiv);
             }
 
-            try {
-                eval(code);
-            } catch (err) {
-                console.log(err);
-            }
-           
-        }
 
-    </script>
+            function createNetwork(obj) {
+                var tr = document.createElement('tr')
+                //tr.setAttribute("data-toggle", "modal");
+                //tr.setAttribute("data-target", "#myModal");
+                tr.setAttribute("data-request", obj.request);
+                tr.setAttribute("data-response", obj.response);
+
+                var tdName = document.createElement('td')
+                tdName.innerText = obj.page
+                tr.appendChild(tdName);
+                var tdStatus = document.createElement('td')
+                tdStatus.innerText = obj.result
+                tr.appendChild(tdStatus);
+
+                tr.onclick = changeModal;
+
+                document.getElementById('network').appendChild(tr);
+
+                
+            }
+
+            function changeModal(event) {
+                $("#request pre").text($(this).data("request"));
+                $("#response pre").text($(this).data("response"));
+                $('#myTab li:eq(0) a').tab('show');
+                $('#myModal').modal('show')
+            }
+
+
+            //$(function () {
+            //    $('#myModal').on('show.bs.modal', function (ene, ene2) {
+            //        console.log(1);
+            //    })
+            //});
+
+            Date.prototype.Format = function (fmt) { //author: meizz
+                var o = {
+                    "M+": this.getMonth() + 1,                 //月份
+                    "d+": this.getDate(),                    //日
+                    "h+": this.getHours(),                   //小时
+                    "m+": this.getMinutes(),                 //分
+                    "s+": this.getSeconds(),                 //秒
+                    "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                    "S": this.getMilliseconds()             //毫秒
+                };
+                if (/(y+)/.test(fmt))
+                    fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+                for (var k in o)
+                    if (new RegExp("(" + k + ")").test(fmt))
+                        fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                return fmt;
+            }
+
+        //window.load('web_url("1","2","3","4");');
+
+
+        </script>
 
 </body>
 </html>

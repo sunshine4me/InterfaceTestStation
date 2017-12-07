@@ -17,16 +17,23 @@
             //函数提示
             return [
                 {
-                    label: '"lr_Request"',
+                    label: 'web_url',
                     kind: monaco.languages.CompletionItemKind.Function,
-                    documentation: "The Lodash library exported as Node.js modules.",
-                    insertText: 'lr_Request("")'
+                    documentation: "请求网页",
+                    insertText: [
+                        'web_url("new step",',
+                        '\t"URL=网页路径",',
+                        '\t"RecContentType=text/html",',
+                        '\t"Referer=",',
+                        '\t"Mode=URL",',
+                        '\tLAST);'
+                    ].join("\r\n")
                 },
                 {
-                    label: '"lr_submit"',
+                    label: 'web_reg_find',
                     kind: monaco.languages.CompletionItemKind.Function,
-                    documentation: "Fast, unopinionated, minimalist web framework",
-                    insertText: '"express": "*"'
+                    documentation: "检查文本",
+                    insertText: 'web_reg_find("Fail=NotFound", "Search=All", "Text=检查文本");'
                 },
                 {
                     label: '"lr_pppp"',
@@ -47,6 +54,9 @@
         });
 
         var code = [
+            'web_reg_find("Fail=NotFound", "Search=All", "Text=testerhome");',
+            'web_reg_find("Fail=NotFound", "Search=All", "Text=心向东");',
+            '',
             'web_url("sign_in",',
                 '\t"URL=Http://testerhome.com/account/sign_in",',
                 '\t"Resource=0",',
@@ -70,12 +80,16 @@
 
 
     var runContainer = document.getElementById('runContainer');
-
+    var runIframe = null;
     $('#RunScript').click(function () {
+        if (runIframe) {
+            // Unload old iframe
+            runContainer.removeChild(runIframe);
+        }
         // Load new iframe
         runIframe = document.createElement('iframe');
         runIframe.id = 'runner';
-        runIframe.src = 'playground/LR-runner.html';
+        runIframe.src = 'playground/LR-runner.html?v1';
         runIframe.className = 'run-iframe';
         runIframe.style.boxSizing = 'border-box';
         runIframe.style.height = '500px';
@@ -87,7 +101,7 @@
      
 
         runIframe.addEventListener('load', function (e) {
-            runIframe.contentWindow.load(editor.getModel().getValue(), '<button type="button" class="btn btn-success">成功按钮</button>', "");
+            runIframe.contentWindow.load(editor.getModel().getValue(), '', "");
         });
     });
 

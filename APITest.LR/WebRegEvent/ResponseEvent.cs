@@ -10,16 +10,16 @@ namespace APITest.LR.WebRegEvent {
             var _args = args as WebRegFindArgs;
 
             StringBuilder sb = new StringBuilder();
-            if(_args.Search== (SearchIn.All | SearchIn.Headers)) {
+            if(_args.Search == SearchIn.All  || _args.Search == SearchIn.Headers) {
                 sb.Append(_args.Response.Headers.ToString());
                 sb.Append(_args.Response.Content.Headers.ToString());
             }
-            if (_args.Search == (SearchIn.All | SearchIn.Body)) {
+            if (_args.Search == SearchIn.All || _args.Search == SearchIn.Body) {
                 sb.Append(_args.Response.Content.ReadAsStringAsync().Result);
             }
             
             if (sb.ToString().IndexOf(_args.Text) >= 0) {
-                _args.Log.Log($"web_reg_find successful for \"Text={_args.Text}\"");
+                _args.Log.Success($"web_reg_find successful for \"Text={_args.Text}\"");
                 return true;
             }
             _args.Log.Error($"\"Text={_args.Text}\" not found for web_reg_find");
@@ -30,11 +30,11 @@ namespace APITest.LR.WebRegEvent {
             var _args = args as WebRegSaveParamArgs;
 
             StringBuilder sb = new StringBuilder();
-            if (_args.Search == (SearchIn.All | SearchIn.Headers)) {
+            if (_args.Search == SearchIn.All || _args.Search == SearchIn.Headers) {
                 sb.Append(_args.Response.Headers.ToString());
                 sb.Append(_args.Response.Content.Headers.ToString());
             }
-            if (_args.Search == (SearchIn.All | SearchIn.Body)) {
+            if (_args.Search == SearchIn.All || _args.Search == SearchIn.Body) {
                 sb.Append(_args.Response.Content.ReadAsStringAsync().Result);
             }
 

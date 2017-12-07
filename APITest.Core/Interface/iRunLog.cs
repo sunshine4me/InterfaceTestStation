@@ -11,6 +11,7 @@ namespace APITest.Core {
         void Log(string msg);
         void Warring(string msg);
         void Error(string msg);
+        void Success(string msg);
         void Network(HttpResponseMessage res);
     }
 

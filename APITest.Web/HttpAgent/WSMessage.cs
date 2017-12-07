@@ -50,7 +50,10 @@ namespace APITest.Web.HttpAgent
         [ProtoEnum(Name = @"LRFunction", Value = 2)]
         LRFunction = 2,
         [ProtoEnum(Name = @"LRFunctionRes", Value = 3)]
-        LRFunctionRes = 3
+        LRFunctionRes = 3,
+        [ProtoEnum(Name = @"NetWorkMeaasge", Value = 4)]
+        NetWorkMeaasge = 4
+        
     }
 
 
@@ -61,7 +64,10 @@ namespace APITest.Web.HttpAgent
         [ProtoEnum(Name = @"Warring", Value = 2)]
         Warring =2 ,
         [ProtoEnum(Name = @"Error", Value = 3)]
-        Error =3
+        Error =3,
+
+        [ProtoEnum(Name = @"Success", Value = 4)]
+        Success = 4,
     }
 
     [ProtoContract]
@@ -72,6 +78,31 @@ namespace APITest.Web.HttpAgent
         [ProtoMember(2)]
         public string logMessage { get; set; }
     }
+
+
+    [ProtoContract]
+    public class NetWorkMeaasge {
+        [ProtoMember(1)]
+        public int result { get; set; }
+
+        [ProtoMember(2)]
+        public string host { get; set; }
+
+        [ProtoMember(3)]
+        public string page { get; set; }
+
+        [ProtoMember(4)]
+        public string url { get; set; }
+
+
+        [ProtoMember(5)]
+        public string request { get; set; }
+
+        [ProtoMember(6)]
+        public string response { get; set; }
+        
+    }
+
 
     [ProtoContract]
     public class LRFunction {

@@ -86,8 +86,7 @@ namespace APITest.LR.Handler {
             foreach (var eve in responseEvents) {
                 eve.EventArgs.Response = response;
                 if (!eve.Execute()) {
-                    Log.Log("case war \"ERROR\", Ending action");
-                    throw new Exception();
+                    throw new Exception("case war \"ERROR\", Ending action");
                 }
             }
             responseEvents.Clear();

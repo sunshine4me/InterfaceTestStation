@@ -11,12 +11,14 @@ enum MessageType {
     Log = 1;
     LRFunction = 2;
 	LRFunctionRes = 3;
+	NetWorkMeaasge = 4;
 }
 
 enum LogType {
     Log = 1;
     Warring = 2;
 	Error = 3;
+	Success = 4;
 }
 
 
@@ -37,5 +39,15 @@ message LRFunctionRes {
     required string name = 1;
     repeated bool isContinue =2;
 	optional string message = 3;
+}
+
+
+message NetWorkMeaasge {
+    required int32 result =1;
+    required string host =2;
+    required string page =3;
+    required string url =4;
+    required string request =5;
+    required string response =6;
 }
 
