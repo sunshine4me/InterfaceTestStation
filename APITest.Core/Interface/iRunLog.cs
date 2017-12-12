@@ -12,7 +12,7 @@ namespace APITest.Core {
         void Warring(string msg);
         void Error(string msg);
         void Success(string msg);
-        void Network(HttpResponseMessage res);
+        void Network(HttpResponseMessage res,string cookieHeader);
     }
 
     

@@ -3,20 +3,13 @@
 <head>
     <meta charset="utf-8" />
     <title></title>
-
-
-
-
     <style type="text/css">
-
-
+        body {
+            overflow-x: hidden;
+        }
         .log {
             padding: 4px;
         }
-
-       
-
-
         .log span {
             padding-right: 6px;
         }
@@ -24,10 +17,11 @@
     <script src="/lib/jquery/dist/jquery.min.js"></script>
     <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
-
 </head>
 <body>
+    <div class="row"><div class="col-md-12"><button type="button" id="export" class="btn btn-default pull-right fade">导出结果</button></div></div>
     <div class="row">
+        
         <div class="col-md-8" id="myTabContent">
             <div class="log" id="log">
 
@@ -46,12 +40,9 @@
                     
                 </tbody>
             </table>
-
-            
         </div>
        
     </div>
-
     <!-- 模态框（Modal） -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
         <div class="modal-dialog" style="width: 95%">
@@ -112,12 +103,8 @@
                     document.body.innerHTML += html;
                 }
                 if (js) {
-
                     var wsUri = "ws://" + window.location.host + "/WS/HttpAgent";
-
                     var websocket = new WebSocket(wsUri);
-
-
                     websocket.onopen = function (evt) {
                         protobuf.load("/playground/WSMessage.proto?v8", function (err, root) {
                             if (err) throw err;
@@ -128,17 +115,23 @@
                             window.models.Log = root.lookup("APITest.Web.HttpAgent.Log");
                             window.models.LogType = root.lookup("APITest.Web.HttpAgent.LogType");
                             window.models.NetWorkMeaasge = root.lookup("APITest.Web.HttpAgent.NetWorkMeaasge");
+                            window.models.LRFunctionRes = root.lookup("APITest.Web.HttpAgent.LRFunctionRes");
                             // To be shared
-                            const sharedBuffer = new SharedArrayBuffer( // (A)
-                                1 * Int32Array.BYTES_PER_ELEMENT); // 1 elements
+                            const sharedBuffer = new SharedArrayBuffer(1024 * Uint16Array.BYTES_PER_ELEMENT); //最大支持1024字符
                             //将共享内存绑定到websocket上,为了方便&不污染全局
-                            websocket.sharedArray = new Int32Array(sharedBuffer);
+                            websocket.sharedArray = new Uint16Array(sharedBuffer);
+                            const endBuffer = new SharedArrayBuffer(1 * Int32Array.BYTES_PER_ELEMENT);
+                            websocket.endArray = new Int32Array(endBuffer);
 
                             var LRWoek = new Worker("/playground/LRscriptRun.js?v5");
-                            var resOver = false;
+                            websocket.worker = LRWoek;
                             LRWoek.onmessage = function (event) {
 
-                                if (event.data == false) {
+                                if (event.data.end) {
+                                    if (event.data.type == 0)
+                                        createLog({ logMessage: event.data.message, type: window.models.LogType.values.Log });
+                                    else
+                                        createLog({ logMessage: event.data.message, type: window.models.LogType.values.Error });
                                     websocket.close();
                                     return;
                                 }
@@ -149,21 +142,23 @@
                                 var msg = window.models.WSMessage.create({ type: window.models.MessageType.values.LRFunction, message: lrBuffer });
 
                                 var msgBuff = window.models.WSMessage.encode(msg).finish();
-
-
                                 websocket.send(msgBuff);
                             };
 
                             //开始运行worker
                             LRWoek.postMessage({
                                 script: js,
-                                sharedBuffer: sharedBuffer
+                                sharedBuffer: sharedBuffer,
+                                endBuffer: endBuffer
                             });
                         });
 
 
                     };
                     websocket.onclose = function (evt) {
+                        //停止worker
+                        websocket.worker.terminate();
+                        $("#export").removeClass("fade");
                         console.log("websocket close");
                     };
                     websocket.onmessage = function (evt) {
@@ -186,8 +181,22 @@
 
 
 
-                            if (msg.type == window.models.MessageType.values.LRFunctionRes)
-                                websocket.sharedArray[0] = 1; //结束标记 修改 sharedArray
+                            if (msg.type == window.models.MessageType.values.LRFunctionRes) {
+
+
+                                var lrs = window.models.LRFunctionRes.decode(msg.message);
+
+                                var u16a = websocket.sharedArray;
+                                var strs = lrs.rtvalue.split("");
+                                var i = 0;
+                                for (; i < strs.length && i < u16a.length; i++) {
+                                    u16a[i] = strs[i].charCodeAt();
+                                }
+                                if (i < u16a.length)
+                                    u16a[i] = 0;
+
+                                websocket.endArray[0] = 1;
+                            }
                         }
                     };
                     websocket.onerror = function (evt) {
@@ -278,7 +287,7 @@
                     "m+": this.getMinutes(),                 //分
                     "s+": this.getSeconds(),                 //秒
                     "q+": Math.floor((this.getMonth() + 3) / 3), //季度
-                    "S": this.getMilliseconds()             //毫秒
+                    "S": pad(this.getMilliseconds() ,3)            //毫秒
                 };
                 if (/(y+)/.test(fmt))
                     fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
@@ -288,8 +297,12 @@
                 return fmt;
             }
 
-        //window.load('web_url("1","2","3","4");');
-
+      
+            function pad(num, n) {
+                var i = (num + "").length;
+                while (i++ < n) num = "0" + num;
+                return num;
+            }  
 
         </script>
 

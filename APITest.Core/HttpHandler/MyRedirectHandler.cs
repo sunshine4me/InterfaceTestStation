@@ -14,8 +14,9 @@ namespace APITest.Core.HttpHandler
     public class MyRedirectHandler : DelegatingHandler {
         private readonly int _maxAutomaticRedirections;
         private iRunLog _log;
-
-        public MyRedirectHandler(int maxAutomaticRedirections, HttpMessageHandler innerHandler,iRunLog log):base(innerHandler) {
+        private CookieContainer cookieContainer;
+        public MyRedirectHandler(int maxAutomaticRedirections, HttpMessageHandler innerHandler, CookieContainer cookieContainer,iRunLog log):base(innerHandler) {
+            this.cookieContainer = cookieContainer;
             _log = log;
             if (maxAutomaticRedirections < 0) {
                 throw new ArgumentOutOfRangeException(nameof(maxAutomaticRedirections));
@@ -56,9 +57,10 @@ namespace APITest.Core.HttpHandler
             HttpResponseMessage response;
             uint redirectCount = 0;
             while (true) {
-                
+              
+                var cookieHeader = cookieContainer.GetCookieHeader(request.RequestUri);
                 response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-                _log.Network(response);
+                _log.Network(response, cookieHeader);
 
                 if (!RequestNeedsRedirect(response)) {
                     break;
@@ -114,6 +116,7 @@ namespace APITest.Core.HttpHandler
 
             return response;
         }
+
 
        
     }

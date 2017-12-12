@@ -31,9 +31,15 @@ namespace APITest.Core
         }
 
         private static HttpMessageHandler DefaultHabdler(iRunLog Log) {
-            HttpMessageHandler handler = new HttpClientHandler() { AllowAutoRedirect = false, AutomaticDecompression  = System.Net.DecompressionMethods.GZip| System.Net.DecompressionMethods.Deflate};
-            handler = new MyRedirectHandler(5, handler, Log);
-            //handler = new MyDecompressionHandler(System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate, handler);
+            var httpClientHandler = new HttpClientHandler() {
+                AllowAutoRedirect = false,
+                //AutomaticDecompression  = System.Net.DecompressionMethods.GZip| System.Net.DecompressionMethods.Deflate
+            };
+
+         
+            HttpMessageHandler handler = new MyDecompressionHandler(System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate, httpClientHandler);
+            handler = new MyRedirectHandler(5, handler, httpClientHandler.CookieContainer, Log);
+           
             
             return handler;
         }
@@ -84,12 +90,20 @@ namespace APITest.Core
         private HttpRequestMessage SetRequestHeaders(HttpRequestMessage request, Dictionary<string, string> headers) {
             MediaTypeHeaderValue ct = null;
             foreach (var key in headers) {
-                if (key.Key.ToLower() == "content-type") {
-                    if(!MediaTypeHeaderValue.TryParse(key.Value, out ct)) {
+
+                var lkey = key.Key.ToLower();
+
+
+                if (lkey == "content-type") {
+                    if (!MediaTypeHeaderValue.TryParse(key.Value, out ct)) {
                         Log.Warring($"setting Content-Type[{key.Value}] was failed, use default parameters Content-Type[application/x-www-form-urlencoded]");
                     }
                     continue;
+                } else if (lkey == "referer") {
+                    if (string.IsNullOrEmpty(key.Value))
+                        continue;
                 }
+                
                 request.Headers.Remove(key.Key);
                 request.Headers.Add(key.Key, key.Value);
             }

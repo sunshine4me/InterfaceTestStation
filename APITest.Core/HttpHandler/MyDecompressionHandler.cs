@@ -33,6 +33,8 @@ namespace APITest.Core.HttpHandler
         internal bool DeflateEnabled => (_decompressionMethods & DecompressionMethods.Deflate) != 0;
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+
+            request.Headers.AcceptEncoding.Clear();
             if (GZipEnabled) {
                 request.Headers.AcceptEncoding.Add(s_gzipHeaderValue);
             }

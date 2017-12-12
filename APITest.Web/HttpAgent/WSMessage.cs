@@ -122,7 +122,7 @@ namespace APITest.Web.HttpAgent
         public bool isContinue { get; set; }
 
         [ProtoMember(3)]
-        public bool message { get; set; }
+        public string rtvalue { get; set; }
     }
 
     

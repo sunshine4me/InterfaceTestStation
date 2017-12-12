@@ -38,7 +38,7 @@ namespace APITest.Web.HttpAgent
             ws.SendAsync(sm.ToArray(), WebSocketMessageType.Binary, true, CancellationToken.None);
         }
 
-        public void Network(HttpResponseMessage res) {
+        public void Network(HttpResponseMessage res,string cookieHeader) {
             var nwm = new NetWorkMeaasge();
             nwm.host =  res.RequestMessage.RequestUri.Host;
 
@@ -52,6 +52,10 @@ namespace APITest.Web.HttpAgent
             StringBuilder request_sb = new StringBuilder();
             request_sb.Append($"{res.RequestMessage.Method.Method} {res.RequestMessage.RequestUri.AbsoluteUri} HTTP/{res.RequestMessage.Version} \r\n");
             request_sb.Append(res.RequestMessage?.Headers?.ToString());
+            if (!string.IsNullOrEmpty(cookieHeader)) {
+                request_sb.Append($"Cookie: {cookieHeader} \r\n");
+            }
+           
             request_sb.Append(res.RequestMessage?.Content?.Headers?.ToString());
             request_sb.Append("\r\n");
             request_sb.Append(res.RequestMessage?.Content?.ReadAsStringAsync().Result);

@@ -9,26 +9,29 @@ namespace APITest.LR.Handler
 {
     internal class FunctionsHandler : iLRFunctions {
 
-        private FunctionsCore runTime;
+        private FunctionsCore functionCore;
         private iRunLog Log;
         private Dictionary<string, string> Parameters;
 
         public FunctionsHandler(iRunLog log, Dictionary<string, string> parameters) {
             Log = log;
             Parameters = parameters;
-            runTime = new FunctionsCore(log);
+            functionCore = new FunctionsCore(log);
         }
 
         public void web_add_auto_header(string name, string value) {
-            runTime.web_add_auto_header(name, value);
+            functionCore.web_add_auto_header(name, value);
+            Log.Log($"web_add_auto_header({name}) was successful");
         }
 
         public void web_add_header(string name, string value) {
-            runTime.web_add_header(name, value);
+            functionCore.web_add_header(name, value);
+            Log.Log($"web_add_header({name}) was successful");
         }
 
         public void web_cleanup_auto_headers() {
-            runTime.web_cleanup_auto_headers();
+            functionCore.web_cleanup_auto_headers();
+            Log.Log($"web_cleanup_auto_headers was successful");
         }
 
         public void web_reg_find(params object[] attrs) {
@@ -58,7 +61,7 @@ namespace APITest.LR.Handler
                 return;
             }
 
-            runTime.web_reg_find(args);
+            functionCore.web_reg_find(args);
             Log.Log("Registering web_reg_find was successful");
         }
 
@@ -105,12 +108,13 @@ namespace APITest.LR.Handler
                 return;
             }
 
-            runTime.web_reg_save_param(args);
+            functionCore.web_reg_save_param(args);
             Log.Log($"Registering web_reg_save_param(\"{args.Name}\") was successful");
         }
 
         public void web_remove_auto_header(string name, string ImplicitGen = null) {
-            runTime.web_remove_auto_header(name);
+            functionCore.web_remove_auto_header(name);
+            Log.Log($"web_remove_auto_header was successful");
         }
 
         public void web_submit_data(string name, string action, params object[] attrs) {
@@ -134,7 +138,8 @@ namespace APITest.LR.Handler
                     paramList.Add(new KeyValuePair<string, string>(k, v));
             }
 
-            runTime.web_submit_data(name, targetUri, paramList);
+            functionCore.web_submit_data(name, targetUri, paramList);
+            Log.Log($"web_submit_data({name}) is finish");
         }
 
 
@@ -152,13 +157,20 @@ namespace APITest.LR.Handler
                 web_add_header("Referer", attributes["referer"]);
             }
 
+            if (attributes.ContainsKey("enctype")) {
+                web_add_header("content-type", attributes["enctype"]);
+            }
+
+
             Log.Log($"web_custom_request({name}) started");
 
             var targetUri = new Uri(url);
 
             var body = attributes.GetValueOrDefault("body");
 
-            runTime.web_custom_request(name, targetUri, body);
+            functionCore.web_custom_request(name, targetUri, body);
+
+            Log.Log($"web_custom_request({name}) is finish");
         }
 
         public void web_url(string name, string url, params object[] attrs) {
@@ -172,7 +184,8 @@ namespace APITest.LR.Handler
                 web_add_header("Referer", attributes["referer"]);
             }
 
-            runTime.web_url(name, targetUri);
+            functionCore.web_url(name, targetUri);
+            Log.Log($"web_url({name}) is finish");
         }
 
 
@@ -247,7 +260,7 @@ namespace APITest.LR.Handler
         }
 
         public void lr_output_message(string text, params object[] attrs) {
-            Log.Warring("lr_output_message is not support, please use [Log(string msg)]");
+            //Log.Warring("lr_output_message is not support, please use [Log(string msg)]");
             Log.Log(text);
         }
     }

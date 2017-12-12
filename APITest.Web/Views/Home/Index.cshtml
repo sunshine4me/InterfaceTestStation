@@ -1,54 +1,28 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-
+<br />
 <button type="button" class="btn btn-default" id="RunScript">Run</button>
+
 <div id="container" style="width:100%;height:500px;border:1px solid #ccc"></div>
 <div id="runContainer"></div>
 @section Scripts {
 
 <script src="~/lib/monaco-editor/min/vs/loader.js"></script>
+
+<script src="~/js/completionItem.js"></script>
 <script>
     require.config({ paths: { 'vs': '/lib/monaco-editor/min/vs' } });
     var editor;
     require(['vs/editor/editor.main'], function (sbLanguage, transpiler) {
 
-        function createDependencyProposals() {
-            //函数提示
-            return [
-                {
-                    label: 'web_url',
-                    kind: monaco.languages.CompletionItemKind.Function,
-                    documentation: "请求网页",
-                    insertText: [
-                        'web_url("new step",',
-                        '\t"URL=网页路径",',
-                        '\t"RecContentType=text/html",',
-                        '\t"Referer=",',
-                        '\t"Mode=URL",',
-                        '\tLAST);'
-                    ].join("\r\n")
-                },
-                {
-                    label: 'web_reg_find',
-                    kind: monaco.languages.CompletionItemKind.Function,
-                    documentation: "检查文本",
-                    insertText: 'web_reg_find("Fail=NotFound", "Search=All", "Text=检查文本");'
-                },
-                {
-                    label: '"lr_pppp"',
-                    kind: monaco.languages.CompletionItemKind.Function,
-                    documentation: "Recursively mkdir, like <code>mkdir -p</code>",
-                    insertText: '"mkdirp": "*"'
-                }
-            ];
-        }
+        
         monaco.languages.typescript.javascriptDefaults.setCompilerOptions({ noLib: true, allowNonTsExtensions: true });
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({ noLib: true });
         monaco.languages.registerCompletionItemProvider('javascript', {
             provideCompletionItems: function (model, position) {
 
-                return createDependencyProposals();
+                return completionItem();
 
             }
         });
@@ -58,10 +32,10 @@
             'web_reg_find("Fail=NotFound", "Search=All", "Text=心向东");',
             '',
             'web_url("sign_in",',
-                '\t"URL=Http://testerhome.com/account/sign_in",',
+                '\t"URL=Http://testerhome.com",',
                 '\t"Resource=0",',
                 '\t"RecContentType=text/html",',
-                '\t"Referer=https://testerhome.com/",',
+                '\t"Referer=https://testerhome.com",',
                 '\t"Snapshot=t3.inf",',
                 '\t"Mode=HTML",',
                 '\tEXTRARES,',
@@ -89,7 +63,7 @@
         // Load new iframe
         runIframe = document.createElement('iframe');
         runIframe.id = 'runner';
-        runIframe.src = 'playground/LR-runner.html?v1';
+        runIframe.src = 'playground/LR-runner.html?v2';
         runIframe.className = 'run-iframe';
         runIframe.style.boxSizing = 'border-box';
         runIframe.style.height = '500px';

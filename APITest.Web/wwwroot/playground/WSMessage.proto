@@ -38,7 +38,7 @@ message LRFunction {
 message LRFunctionRes {
     required string name = 1;
     repeated bool isContinue =2;
-	optional string message = 3;
+	optional string rtvalue = 3;
 }
 
 
