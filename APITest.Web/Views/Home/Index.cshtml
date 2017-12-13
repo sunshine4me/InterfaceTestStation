@@ -1,84 +1,117 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-<br />
-<button type="button" class="btn btn-default" id="RunScript">Run</button>
 
-<div id="container" style="width:100%;height:500px;border:1px solid #ccc"></div>
-<div id="runContainer"></div>
+ 
+
+<div class="row">
+   
+    <div class="list-group col-md-4" id="scriptList">
+        <br />
+        <div  class="list-group-item active">
+            <a class="btn btn-default btn-xs pull-right" asp-area="" asp-controller="Home" asp-action="New">
+                <span class="glyphicon glyphicon-plus-sign"></span> Add
+            </a>
+            <h4 class="list-group-item-heading">
+                Case List
+            </h4>
+            
+        </div>
+        <div class="list-group-item noScript">
+                <span>No script !</span>
+          
+        </div>
+
+        @*<a href="#" class="list-group-item">
+            <p class="list-group-item-text">
+                [2017-12-11] 您将通过网页进行免费域名注册。
+            </p>
+        </a>*@
+       
+    </div>
+
+    <div class="col-md-8">
+        <div class="page-header">
+            <h1>Document</h1>
+        </div>
+        <p>
+            <i class="glyphicon glyphicon-arrow-left"></i> <span> 请查看左侧demo, 如果您看不到demo, 请点击 <a class="createDemo" href="#">这里</a> 生成 </span>
+        </p>
+
+        <div class="alert alert-success" role="alert">
+            <p><strong>PS1: </strong> 脚本使用 javascript 为载体, 如有语法问题请参考 javascript 教程.</p>
+            <p><strong>PS2: </strong> 目前正在进行测试阶段, 如遇到问题请提交给我 <a href="mailto:sunxujianxiou@sina.com">sunxujianxiou@sina.com</a> .</p>
+        </div>
+        
+    </div>
+</div>
+
+
+
+
 @section Scripts {
+    <script>
+        if (localStorage.first) {
+            localStorage.first = "1";
+            createDemoCase();
+        }
+            
+      
+        var scriptList = $("#scriptList");
 
-<script src="~/lib/monaco-editor/min/vs/loader.js"></script>
+        if (localStorage.length > 0)
+            $("#scriptList .noScript").remove();
+        for (var i = 0; i < localStorage.length; i++) {
+            var key = localStorage.key(i);
+            var script = JSON.parse(localStorage.getItem(key));
+            var div = document.createElement("div");
+            div.className = "list-group-item";
 
-<script src="~/js/completionItem.js"></script>
-<script>
-    require.config({ paths: { 'vs': '/lib/monaco-editor/min/vs' } });
-    var editor;
-    require(['vs/editor/editor.main'], function (sbLanguage, transpiler) {
+            var link = document.createElement("a");
+            link.href = "/Home/New?id=" + key;
+            link.innerText = script.name;
+            div.appendChild(link);
+
+            var dButton = document.createElement("button");
+            dButton.setAttribute("type", "button");
+            dButton.setAttribute("data-id", key);
+            dButton.className = 'close pull-right';
+            dButton.innerHTML = "&times;";
+            dButton.onclick = deleteScript;
+            div.appendChild(dButton);
+
+            scriptList.append(div);
+        }
+
+        function deleteScript(event) {
+            var id = $(this).data("id");
+            var item = $(this).parent();
+            $.confirmModel({
+                body: "确认删除这个案例吗?",
+                submit: function () {
+                    localStorage.removeItem(id);
+                    item.remove();
+                }
+            })
+
+
+        }
+
+        $(".createDemo").bind("click", function () {
+            createDemoCase();
+        });
+
+        function createDemoCase() {
+            var case1 = { "name": "登录TesterHome", "content": "//设置用户名 : anonymous\r\nlr_save_string(\"anonymous\", \"username\");\r\n//设置密码 : 123456\r\nlr_save_string(\"123456\", \"password\");\r\n\r\n//保存csrf-token\r\nweb_reg_save_param(\"csrf\",\r\n    \"LB=<meta name=\\\"csrf-token\\\" content=\\\"\",\r\n    \"RB=\\\"\",\r\n    \"Search=All\",\r\n    LAST);\r\n\r\nweb_url(\"newStep\",\r\n    \"URL=https://testerhome.com/account/sign_in\",\r\n    \"Referer=\",\r\n    \"Mode=URL\",\r\n    LAST);\r\n\r\n//将 csrf-token 放在下一个请求的header中\r\nweb_add_header(\"X-CSRF-Token\", \"{csrf}\");\r\n//如果登录成功,会正确跳转到home页面,检查页面元素\r\nweb_reg_find(\"Fail=NotFound\", \"Search=All\", \"Text=class=\\\"page-home\\\"\");\r\nweb_custom_request(\"newStep\",\r\n    \"URL=https://testerhome.com/account/sign_in\",\r\n    \"EncType=application/x-www-form-urlencoded\",\r\n    \"Referer=\",\r\n    \"Body=utf8=%E2%9C%93&user%5Blogin%5D={username}&user%5Bpassword%5D={password}&user%5Bremember_me%5D=0&commit=%E7%99%BB%E5%BD%95\",\r\n    LAST);\r\n\r\nlr_output_message(\"如果你看到这条信息,恭喜你登录成功了\");" };
+            var case2 = { "name": "自定义函数", "content": "//随机生身份证\r\nfunction getId_no() {\r\n    var coefficientArray = [\"7\", \"9\", \"10\", \"5\", \"8\", \"4\", \"2\", \"1\", \"6\", \"3\", \"7\", \"9\", \"10\", \"5\", \"8\", \"4\", \"2\"];// 加权因子\r\n    var lastNumberArray = [\"1\", \"0\", \"X\", \"9\", \"8\", \"7\", \"6\", \"5\", \"4\", \"3\", \"2\"];// 校验码\r\n    var address = \"420101\"; // 住址\r\n    var birthday = \"19810101\"; // 生日\r\n    var s = Math.floor(Math.random() * 10).toString() + Math.floor(Math.random() * 10).toString() + Math.floor(Math.random() * 10).toString();\r\n    var array = (address + birthday + s).split(\"\");\r\n    var total = 0;\r\n    for (i in array) {\r\n        total = total + parseInt(array[i]) * parseInt(coefficientArray[i]);\r\n    }\r\n    var lastNumber = lastNumberArray[parseInt(total % 11)];\r\n    var id_no_String = address + birthday + s + lastNumber;\r\n    return id_no_String;\r\n}\r\n\r\nlr_save_string(getId_no(), \"cardId\");\r\n" };
+            localStorage.setItem("case1", JSON.stringify(case1));
+            localStorage.setItem("case2", JSON.stringify(case2));
+            window.location.href = "/";
+
+        }
 
         
-        monaco.languages.typescript.javascriptDefaults.setCompilerOptions({ noLib: true, allowNonTsExtensions: true });
-        monaco.languages.typescript.typescriptDefaults.setCompilerOptions({ noLib: true });
-        monaco.languages.registerCompletionItemProvider('javascript', {
-            provideCompletionItems: function (model, position) {
-
-                return completionItem();
-
-            }
-        });
-
-        var code = [
-            'web_reg_find("Fail=NotFound", "Search=All", "Text=testerhome");',
-            'web_reg_find("Fail=NotFound", "Search=All", "Text=心向东");',
-            '',
-            'web_url("sign_in",',
-                '\t"URL=Http://testerhome.com",',
-                '\t"Resource=0",',
-                '\t"RecContentType=text/html",',
-                '\t"Referer=https://testerhome.com",',
-                '\t"Snapshot=t3.inf",',
-                '\t"Mode=HTML",',
-                '\tEXTRARES,',
-                '\t"Url=https://www.google-analytics.com/collect?v=1&_v=j60&a=450370903&t=pageview&_s=2&dl=https%3A%2F%2Ftesterhome.com%2F&ul=zh-cn&de=utf-8&dt=%E7%99%BB%E5%BD%95%20%C2%B7%20TesterHome&sd=24-bit&sr=1280x800&vp=792x544&je=1&fl=20.0%20r0&_u=KGBAgEQ~&jid=&gjid=&cid=364379208.1504577662&tid=UA-45014075-1&_gid=1432109762.1504577662&z=667031373", ENDITEM,',
-                '\tLAST);'
-        ];
-
-        editor = monaco.editor.create(document.getElementById("container"), {
-            value: code.join('\n'),
-
-            language: "javascript"
-        });
-
-       
-    });
-
-
-    var runContainer = document.getElementById('runContainer');
-    var runIframe = null;
-    $('#RunScript').click(function () {
-        if (runIframe) {
-            // Unload old iframe
-            runContainer.removeChild(runIframe);
-        }
-        // Load new iframe
-        runIframe = document.createElement('iframe');
-        runIframe.id = 'runner';
-        runIframe.src = 'playground/LR-runner.html?v2';
-        runIframe.className = 'run-iframe';
-        runIframe.style.boxSizing = 'border-box';
-        runIframe.style.height = '500px';
-        runIframe.style.width = '100%';
-        runIframe.style.border = '1px solid lightgrey';
-        runIframe.frameborder = '0';
-        runContainer.appendChild(runIframe);
-
-     
-
-        runIframe.addEventListener('load', function (e) {
-            runIframe.contentWindow.load(editor.getModel().getValue(), '', "");
-        });
-    });
-
-</script>
+    </script>
+   
 
 }

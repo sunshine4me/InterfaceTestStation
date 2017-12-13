@@ -1,0 +1,164 @@
+﻿@{
+    ViewData["Title"] = "Script Page";
+}
+
+
+
+<div style="padding:5px 20px">
+
+    <button type="button" class="btn btn-primary" id="RunScript">Run Script</button>
+
+    <button type="button" class="btn btn-success pull-right" id="SaveScript" data-toggle="modal" data-target="#saveModal">Save Script</button>
+</div>
+
+
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="saveModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form id="saveForm">
+                    <div class="input-group">
+                        <input type="hidden"  name="scriptId" >
+                        <input type="text" required="required" name="scriptName" placeholder="Script Name" class="form-control">
+                        <span class="input-group-btn">
+                            <button class="btn btn-success" type="submit">
+                                <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                            </button>
+                        </span>
+                    </div><!-- /input-group -->
+                </form>
+            </div>
+
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+
+
+<div id="container" style="width:100%;height:500px;border:1px solid #ccc"></div>
+<div id="runContainer"></div>
+@section Scripts {
+<div id="loading">
+    <div id="loading-center">
+        <div id="loading-center-absolute">
+            <div class="object" id="object_one"></div>
+            <div class="object" id="object_two"></div>
+            <div class="object" id="object_three"></div>
+            <div class="object" id="object_four"></div>
+        </div>
+    </div>
+
+</div>
+    <script src="~/lib/monaco-editor/min/vs/loader.js"></script>
+
+    <script src="~/js/completionItem.js"></script>
+    <script>
+        
+
+
+        require.config({ paths: { 'vs': '/lib/monaco-editor/min/vs' } });
+        var editor;
+        require(['vs/editor/editor.main'], function (sbLanguage, transpiler) {
+
+
+            monaco.languages.typescript.javascriptDefaults.setCompilerOptions({ noLib: true, allowNonTsExtensions: true });
+            monaco.languages.typescript.typescriptDefaults.setCompilerOptions({ noLib: true });
+            monaco.languages.registerCompletionItemProvider('javascript', {
+                provideCompletionItems: function (model, position) {
+
+                    return completionItem();
+
+                }
+            });
+
+            var code = [
+                'web_reg_find("Fail=NotFound", "Search=All", "Text=testerhome");',
+                'web_reg_find("Fail=NotFound", "Search=All", "Text=心向东");',
+                '',
+                'web_url("sign_in",',
+                '\t"URL=Http://testerhome.com",',
+                '\t"Resource=0",',
+                '\t"RecContentType=text/html",',
+                '\t"Referer=https://testerhome.com",',
+                '\t"Snapshot=t3.inf",',
+                '\t"Mode=HTML",',
+                '\tEXTRARES,',
+                '\t"Url=https://www.google-analytics.com/collect?v=1&_v=j60&a=450370903&t=pageview&_s=2&dl=https%3A%2F%2Ftesterhome.com%2F&ul=zh-cn&de=utf-8&dt=%E7%99%BB%E5%BD%95%20%C2%B7%20TesterHome&sd=24-bit&sr=1280x800&vp=792x544&je=1&fl=20.0%20r0&_u=KGBAgEQ~&jid=&gjid=&cid=364379208.1504577662&tid=UA-45014075-1&_gid=1432109762.1504577662&z=667031373", ENDITEM,',
+                '\tLAST);'
+            ];
+
+            editor = monaco.editor.create(document.getElementById("container"), {
+                //value: code.join('\n'),
+
+                language: "javascript"
+            });
+
+
+            var id = getQueryVariable("id");
+            if (id) {
+                var scriptString = localStorage.getItem(id);
+                if (scriptString) {
+                    var script = JSON.parse(scriptString);
+                    $("#saveForm input[name='scriptName']").val(script.name);
+                    editor.setValue(script.content);
+                }
+            } else {
+                id = new Date().Format("yyyyMMddhhmmssS");
+            }
+
+            $("#saveForm input[name='scriptId']").val(id);
+
+            $("#loading").hide(500);
+            
+        });
+
+
+        var runContainer = document.getElementById('runContainer');
+        var runIframe = null;
+        $('#RunScript').click(function () {
+            if (runIframe) {
+                // Unload old iframe
+                runContainer.removeChild(runIframe);
+            }
+            // Load new iframe
+            runIframe = document.createElement('iframe');
+            runIframe.id = 'runner';
+            runIframe.src = '/playground/LR-runner.html?v2';
+            runIframe.className = 'run-iframe';
+            runIframe.style.boxSizing = 'border-box';
+            runIframe.style.height = '500px';
+            runIframe.style.width = '100%';
+            runIframe.style.border = '1px solid lightgrey';
+            runIframe.frameborder = '0';
+            runContainer.appendChild(runIframe);
+
+
+
+            runIframe.addEventListener('load', function (e) {
+                runIframe.contentWindow.load(editor.getModel().getValue(), '', "");
+            });
+        });
+
+
+        $("#saveForm").submit(function (event) {
+            event.preventDefault();
+            var name = $("#saveForm input[name='scriptName']").val();
+            var id = $("#saveForm input[name='scriptId']").val();
+            
+            var content = editor.getModel().getValue();
+
+            var scriptString = JSON.stringify({ name: name, content: content });
+
+            localStorage.setItem(id, scriptString);
+
+            $('#saveModal').modal('hide');
+          
+        })
+
+
+        
+    </script>
+
+}

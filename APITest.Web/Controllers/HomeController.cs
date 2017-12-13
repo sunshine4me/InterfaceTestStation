@@ -10,6 +10,9 @@ namespace APITest.Web.Controllers
 {
     public class HomeController : Controller
     {
+
+      
+
         public IActionResult Index()
         {
             return View();
@@ -21,6 +24,16 @@ namespace APITest.Web.Controllers
 
             return View();
         }
+
+
+        public IActionResult New() {
+            return View();
+        }
+
+        public IActionResult Scripts() {
+            return View();
+        }
+
 
         public IActionResult Contact()
         {

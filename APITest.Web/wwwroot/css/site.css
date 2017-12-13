@@ -33,3 +33,31 @@
         display: none;
     }
 }
+
+
+/*弹出确认框>>>>>>>>>>>>>>>>>>>>*/
+#confirmModal .confirm-body {
+    margin: 10px 0px;
+}
+
+#confirmModal .confirm-title {
+    margin-left: 5px;
+}
+
+#confirmModal .modal-header {
+    border: hidden;
+}
+
+#confirmModal .confirm-footer {
+    text-align: right;
+}
+
+#confirmModal .modal-dialog .btn {
+    margin-left: 5px;
+}
+
+#confirmModal .modal-dialog {
+    max-width: 400px;
+}
+
+/*弹出确认框<<<<<<<<<<<<<<<<<<*/

@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
 </head>
 <body>
-    <div class="row"><div class="col-md-12"><button type="button" id="export" class="btn btn-default pull-right fade">导出结果</button></div></div>
+    <div class="row"><div class="col-md-12"><button type="button" id="export" class="btn btn-danger pull-right fade">测试阶段暂不支持导出报告</button></div></div>
     <div class="row">
         
         <div class="col-md-8" id="myTabContent">
@@ -280,6 +280,11 @@
             //});
 
             Date.prototype.Format = function (fmt) { //author: meizz
+                function pad(num, n) {
+                    var i = (num + "").length;
+                    while (i++ < n) num = "0" + num;
+                    return num;
+                }  
                 var o = {
                     "M+": this.getMonth() + 1,                 //月份
                     "d+": this.getDate(),                    //日
@@ -295,14 +300,12 @@
                     if (new RegExp("(" + k + ")").test(fmt))
                         fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
                 return fmt;
+
+                
             }
 
       
-            function pad(num, n) {
-                var i = (num + "").length;
-                while (i++ < n) num = "0" + num;
-                return num;
-            }  
+           
 
         </script>
 

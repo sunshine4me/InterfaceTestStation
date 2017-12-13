@@ -257,6 +257,7 @@ namespace APITest.LR.Handler
 
         public void lr_save_string(string value, string name) {
             Parameters[name] = value;
+            Log.Log($"save parameter \"{name}={value}\"");
         }
 
         public void lr_output_message(string text, params object[] attrs) {
