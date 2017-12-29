@@ -51,7 +51,7 @@
 
 @section Scripts {
     <script>
-        if (localStorage.first) {
+        if (localStorage.first == null) {
             localStorage.first = "1";
             createDemoCase();
         }
@@ -63,6 +63,7 @@
             $("#scriptList .noScript").remove();
         for (var i = 0; i < localStorage.length; i++) {
             var key = localStorage.key(i);
+            if (key == "first") continue;
             var script = JSON.parse(localStorage.getItem(key));
             var div = document.createElement("div");
             div.className = "list-group-item";

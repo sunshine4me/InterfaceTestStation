@@ -14,12 +14,22 @@ namespace APITest.Web
     {
         public static void Main(string[] args)
         {
+            //dotnet run --server.urls "http://localhost:5001;http://localhost:5002;http://*:5003"
+            
             BuildWebHost(args).Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
+        public static IWebHost BuildWebHost(string[] args) {
+
+            var config = new ConfigurationBuilder()
+                .AddCommandLine(args)
                 .Build();
+
+            return WebHost.CreateDefaultBuilder(args)
+               .UseConfiguration(config)
+               .UseStartup<Startup>()
+               .Build();
+        }
     }
+           
 }
